@@ -156,20 +156,6 @@
     let sphereRadius = 1;
     let ready = false;
 
-    function makeShadowTexture() {
-      const size = 256;
-      const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-      gradient.addColorStop(0, 'rgba(0,0,0,0.32)');
-      gradient.addColorStop(0.7, 'rgba(0,0,0,0.14)');
-      gradient.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, size, size);
-      return new THREE.CanvasTexture(canvas);
-    }
-
     loader.load('model/die.glb', (gltf) => {
       const model = gltf.scene;
 
@@ -197,17 +183,6 @@
       key.position.set(-sphereRadius * 1.2, sphereRadius * 2.6, sphereRadius * 2.2);
       key.target.position.set(0, 0, 0);
       scene.add(key.target);
-
-      const shadowGeo = new THREE.PlaneGeometry(sphereRadius * 2.6, sphereRadius * 2.6);
-      const shadowMat = new THREE.MeshBasicMaterial({
-        map: makeShadowTexture(),
-        transparent: true,
-        depthWrite: false
-      });
-      const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
-      shadowPlane.rotation.x = -Math.PI / 2;
-      shadowPlane.position.y = -sphereRadius * 0.98;
-      scene.add(shadowPlane);
 
       resize();
       ready = true;
