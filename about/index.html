@@ -28,8 +28,8 @@
   }
   .hero model-viewer {
     flex: 0 0 auto;
-    width: clamp(220px, 24vw, 320px);
-    height: clamp(220px, 24vw, 320px);
+    width: clamp(260px, 30vw, 400px);
+    height: clamp(260px, 30vw, 400px);
     --poster-color: transparent;
   }
   .hero .hero-text { flex: 1 1 auto; }
@@ -57,7 +57,7 @@
   .coffee-link svg { width: 18px; height: 18px; flex: none; }
   @media (max-width: 700px) {
     .hero { flex-direction: column; gap: 24px; text-align: center; }
-    .hero model-viewer { width: min(280px, 60vw); height: min(280px, 60vw); }
+    .hero model-viewer { width: min(300px, 70vw); height: min(300px, 70vw); }
     header, footer { text-align: center; }
   }
 </style>
@@ -80,8 +80,8 @@
       interaction-prompt="none"
       shadow-intensity="1"
       exposure="1.1"
-      camera-orbit="15deg 70deg 3.2m"
-      field-of-view="30deg"
+      camera-orbit="20deg 74deg 145%"
+      field-of-view="28deg"
       style="background: transparent;">
     </model-viewer>
     <div class="hero-text">
