@@ -5,6 +5,7 @@
 <title>Threes — About</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Threes is a pass-and-play dice game for 1-8 players. Lowest score wins. Hold your dice, re-roll the rest, and watch out for 3s.">
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -25,11 +26,11 @@
     gap: clamp(32px, 6vw, 80px);
     margin-bottom: clamp(40px, 6vw, 72px);
   }
-  .hero img.screenshot {
+  .hero model-viewer {
     flex: 0 0 auto;
-    width: clamp(200px, 22vw, 300px);
-    border-radius: 24px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    width: clamp(220px, 24vw, 320px);
+    height: clamp(220px, 24vw, 320px);
+    --poster-color: transparent;
   }
   .hero .hero-text { flex: 1 1 auto; }
   h2 { font-weight: 600; font-size: clamp(19px, 2vw, 22px); margin-top: clamp(28px, 4vw, 44px); }
@@ -39,10 +40,24 @@
   .moon { color: #A23B2F; font-weight: 600; }
   hr { border: none; border-top: 1px solid #E5E3DE; margin: clamp(32px, 5vw, 56px) 0; }
   footer { text-align: center; color: #A9A9AE; font-size: 13px; }
-  footer a { color: #6E6E73; }
+  footer p { font-size: 14px; color: #A9A9AE; }
+  .coffee-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #6E6E73;
+    text-decoration: none;
+    font-weight: 500;
+    border: 1px solid #E5E3DE;
+    border-radius: 999px;
+    padding: 8px 18px;
+    margin-top: 6px;
+  }
+  .coffee-link:hover { background: #F2EDE0; color: #1C1C1E; }
+  .coffee-link svg { width: 18px; height: 18px; flex: none; }
   @media (max-width: 700px) {
     .hero { flex-direction: column; gap: 24px; text-align: center; }
-    .hero img.screenshot { width: min(260px, 60vw); }
+    .hero model-viewer { width: min(280px, 60vw); height: min(280px, 60vw); }
     header, footer { text-align: center; }
   }
 </style>
@@ -54,7 +69,21 @@
   </header>
 
   <div class="hero">
-    <img class="screenshot" src="img/splash.jpg" alt="Threes app splash screen showing a red die on a wooden table">
+    <model-viewer
+      src="model/die.glb"
+      alt="A spinning red die"
+      auto-rotate
+      auto-rotate-delay="0"
+      rotation-per-second="30deg"
+      camera-controls
+      disable-zoom
+      interaction-prompt="none"
+      shadow-intensity="1"
+      exposure="1.1"
+      camera-orbit="15deg 70deg 3.2m"
+      field-of-view="30deg"
+      style="background: transparent;">
+    </model-viewer>
     <div class="hero-text">
       <h2 style="margin-top:0">About</h2>
       <p>Threes is a simple dice game for 1 to 8 players, played by passing one phone around the table. Each turn you roll 5 dice, hold the ones you want to keep, and re-roll the rest until all 5 are held. Lowest total score wins the round.</p>
@@ -78,7 +107,15 @@
 
   <footer>
     <p>Threes has no ads, no accounts, and no data collection. It works entirely offline.</p>
-    <p>Enjoying the game? <a href="https://buymeacoffee.com/alokdhir" target="_blank" rel="noopener">Buy the developer a coffee</a>.</p>
+    <a class="coffee-link" href="https://buymeacoffee.com/alokdhir" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 9h13a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M17 11h1.5a2 2 0 0 1 0 4H17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6 9c0-1.2.6-1.7 1-2.3.5-.6.7-1 .5-1.9M10 9c0-1.2.6-1.7 1-2.3.5-.6.7-1 .5-1.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M3 20h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      Buy the developer a coffee
+    </a>
   </footer>
 </body>
 </html>
