@@ -5,7 +5,6 @@
 <title>Threes — About</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Threes is a pass-and-play dice game for 1-8 players. Lowest score wins. Hold your dice, re-roll the rest, and watch out for 3s.">
-<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -26,12 +25,15 @@
     gap: clamp(32px, 6vw, 80px);
     margin-bottom: clamp(40px, 6vw, 72px);
   }
-  .hero model-viewer {
+  #die-viewer {
     flex: 0 0 auto;
     width: clamp(260px, 30vw, 400px);
     height: clamp(260px, 30vw, 400px);
-    --poster-color: transparent;
+    touch-action: none;
+    cursor: grab;
   }
+  #die-viewer:active { cursor: grabbing; }
+  #die-viewer canvas { display: block; width: 100%; height: 100%; }
   .hero .hero-text { flex: 1 1 auto; }
   h2 { font-weight: 600; font-size: clamp(19px, 2vw, 22px); margin-top: clamp(28px, 4vw, 44px); }
   p, li { color: #3C3C43; font-size: clamp(16px, 1.4vw, 18px); }
@@ -57,7 +59,7 @@
   .coffee-link svg { width: 18px; height: 18px; flex: none; }
   @media (max-width: 700px) {
     .hero { flex-direction: column; gap: 24px; text-align: center; }
-    .hero model-viewer { width: min(300px, 70vw); height: min(300px, 70vw); }
+    #die-viewer { width: min(300px, 70vw); height: min(300px, 70vw); }
     header, footer { text-align: center; }
   }
 </style>
@@ -69,21 +71,7 @@
   </header>
 
   <div class="hero">
-    <model-viewer
-      src="model/die.glb"
-      alt="A spinning red die"
-      auto-rotate
-      auto-rotate-delay="0"
-      rotation-per-second="30deg"
-      camera-controls
-      disable-zoom
-      interaction-prompt="none"
-      shadow-intensity="1"
-      exposure="1.1"
-      camera-orbit="20deg 74deg 145%"
-      field-of-view="28deg"
-      style="background: transparent;">
-    </model-viewer>
+    <div id="die-viewer" role="img" aria-label="A red die you can drag to spin"></div>
     <div class="hero-text">
       <h2 style="margin-top:0">About</h2>
       <p>Threes is a simple dice game for 1 to 8 players, played by passing one phone around the table. Each turn you roll 5 dice, hold the ones you want to keep, and re-roll the rest until all 5 are held. Lowest total score wins the round.</p>
@@ -117,5 +105,211 @@
       Buy the developer a coffee
     </a>
   </footer>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+    const container = document.getElementById('die-viewer');
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
+
+    function resize() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+
+    const key = new THREE.DirectionalLight(0xffffff, 2.4);
+    scene.add(key);
+
+    const ambient = new THREE.AmbientLight(0xffffff, 1.0);
+    scene.add(ambient);
+
+    const dieGroup = new THREE.Group();
+    scene.add(dieGroup);
+
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
+
+    let sphereRadius = 1;
+    let ready = false;
+
+    function makeShadowTexture() {
+      const size = 256;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+      gradient.addColorStop(0, 'rgba(0,0,0,0.32)');
+      gradient.addColorStop(0.7, 'rgba(0,0,0,0.14)');
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    loader.load('model/die.glb', (gltf) => {
+      const model = gltf.scene;
+
+      const box = new THREE.Box3().setFromObject(model);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+      model.position.sub(center);
+
+      sphereRadius = size.length() / 2;
+      dieGroup.add(model);
+
+      const randomAxis = new THREE.Vector3(
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1
+      ).normalize();
+      dieGroup.quaternion.setFromAxisAngle(randomAxis, Math.random() * Math.PI * 2);
+
+      const dist = sphereRadius * 3.6;
+      camera.position.set(dist * 0.55, dist * 0.6, dist * 0.85);
+      camera.lookAt(0, 0, 0);
+
+      key.position.set(-sphereRadius * 1.2, sphereRadius * 2.6, sphereRadius * 2.2);
+      key.target.position.set(0, 0, 0);
+      scene.add(key.target);
+
+      const shadowGeo = new THREE.PlaneGeometry(sphereRadius * 2.6, sphereRadius * 2.6);
+      const shadowMat = new THREE.MeshBasicMaterial({
+        map: makeShadowTexture(),
+        transparent: true,
+        depthWrite: false
+      });
+      const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+      shadowPlane.rotation.x = -Math.PI / 2;
+      shadowPlane.position.y = -sphereRadius * 0.98;
+      scene.add(shadowPlane);
+
+      resize();
+      ready = true;
+      requestAnimationFrame(animate);
+    });
+
+    // Free-axis tumble, matching the app's splash-screen die behavior:
+    // a slowly drifting random baseline axis, plus fling momentum that
+    // decays back into the baseline drift.
+    const currentAxis = new THREE.Vector3(0.3, 1.0, 0.2).normalize();
+    const targetAxis = currentAxis.clone();
+    let axisDriftTimer = 0;
+    let lastTime = 0;
+    const baselineSpeed = 0.18; // rad/s
+
+    const momentum = new THREE.Vector3(0, 0, 0);
+    const momentumHalfLife = 1.4; // seconds
+
+    let freezeUntil = 0;
+    let isDragging = false;
+
+    const RIGHT_AXIS = new THREE.Vector3(1, 0, -0.5).normalize();
+    const UP_AXIS = new THREE.Vector3(0, 1, 0);
+
+    function animate(time) {
+      requestAnimationFrame(animate);
+      const t = time / 1000;
+      const dt = lastTime === 0 ? 0 : Math.min(t - lastTime, 0.1);
+      lastTime = t;
+
+      if (!isDragging && t >= freezeUntil) {
+        axisDriftTimer += dt;
+        if (axisDriftTimer > 3.0) {
+          axisDriftTimer = 0;
+          targetAxis.set(
+            Math.random() * 2 - 1,
+            0.5 + Math.random() * 0.5,
+            Math.random() * 2 - 1
+          ).normalize();
+        }
+        currentAxis.lerp(targetAxis, Math.min(dt * 0.8, 1)).normalize();
+
+        const decay = Math.pow(0.5, dt / momentumHalfLife);
+        momentum.multiplyScalar(decay);
+
+        const angVel = currentAxis.clone().multiplyScalar(baselineSpeed).add(momentum);
+        const speed = angVel.length();
+        if (speed > 1e-5) {
+          const axis = angVel.clone().normalize();
+          const deltaQ = new THREE.Quaternion().setFromAxisAngle(axis, speed * dt);
+          dieGroup.quaternion.premultiply(deltaQ);
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // Pointer drag → direct rotation; release → fling momentum.
+    let lastPointer = null;
+    let lastMoveTime = 0;
+    let velocity = { x: 0, y: 0 }; // px/ms
+
+    function onPointerDown(e) {
+      if (!ready) return;
+      isDragging = true;
+      momentum.set(0, 0, 0);
+      freezeUntil = 0;
+      lastPointer = { x: e.clientX, y: e.clientY };
+      lastMoveTime = performance.now();
+      velocity = { x: 0, y: 0 };
+      container.setPointerCapture(e.pointerId);
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging || !lastPointer) return;
+      const now = performance.now();
+      const dtMs = Math.max(now - lastMoveTime, 1);
+      const dx = e.clientX - lastPointer.x;
+      const dy = e.clientY - lastPointer.y;
+      velocity = { x: dx / dtMs, y: dy / dtMs };
+      lastPointer = { x: e.clientX, y: e.clientY };
+      lastMoveTime = now;
+
+      const sensitivity = 0.012;
+      const yawQ = new THREE.Quaternion().setFromAxisAngle(UP_AXIS, dx * sensitivity);
+      const pitchQ = new THREE.Quaternion().setFromAxisAngle(RIGHT_AXIS, dy * sensitivity);
+      dieGroup.quaternion.premultiply(yawQ.multiply(pitchQ));
+    }
+
+    function onPointerUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      const toAngular = 5.5;
+      momentum.copy(UP_AXIS).multiplyScalar(velocity.x * toAngular)
+        .add(RIGHT_AXIS.clone().multiplyScalar(velocity.y * toAngular));
+      lastPointer = null;
+    }
+
+    container.addEventListener('pointerdown', onPointerDown);
+    container.addEventListener('pointermove', onPointerMove);
+    container.addEventListener('pointerup', onPointerUp);
+    container.addEventListener('pointercancel', onPointerUp);
+  </script>
 </body>
 </html>
