@@ -40,6 +40,30 @@
   ol { padding-left: 22px; }
   .hint { background: #E0D2B5; border-radius: 12px; padding: 16px 22px; font-size: clamp(14px, 1.2vw, 16px); }
   .moon { color: #A23B2F; font-weight: 600; }
+  .play-row {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(32px, 6vw, 80px);
+    margin-bottom: clamp(20px, 2vw, 28px);
+  }
+  .play-text { flex: 1 1 auto; min-width: 0; }
+  .play-text h2 { margin-top: 0; }
+  .play-text ol { margin-bottom: 0; }
+  .get-app { flex: 0 0 auto; text-align: center; margin-top: clamp(4px, 1vw, 12px); }
+  .get-app-label {
+    margin: 0 0 14px;
+    color: #6E6E73;
+    font-size: clamp(14px, 1.2vw, 16px);
+    letter-spacing: 0.3px;
+  }
+  .app-store-badge { display: inline-block; line-height: 0; }
+  .app-store-badge img {
+    display: block;
+    width: clamp(180px, 17vw, 210px);
+    height: auto;
+  }
+  .app-store-badge:hover { opacity: 0.82; }
+  .get-app-note { margin: 14px 0 0; color: #A9A9AE; font-size: 14px; }
   hr { border: none; border-top: 1px solid #E5E3DE; margin: clamp(32px, 5vw, 56px) 0; }
   footer { text-align: center; color: #A9A9AE; font-size: 13px; }
   footer p { font-size: 14px; color: #A9A9AE; }
@@ -59,6 +83,8 @@
   .coffee-link svg { width: 18px; height: 18px; flex: none; }
   @media (max-width: 700px) {
     .hero { flex-direction: column; gap: 24px; text-align: center; }
+    .play-row { flex-direction: column; align-items: stretch; gap: 32px; }
+    .get-app { align-self: center; margin-top: 0; }
     #die-viewer { width: min(300px, 70vw); height: min(300px, 70vw); }
     header, footer { text-align: center; }
   }
@@ -79,15 +105,26 @@
     </div>
   </div>
 
-  <h2>How to play</h2>
-  <ol>
-    <li>Enter the names of everyone playing (1-8 players).</li>
-    <li>On your turn, roll all 5 dice.</li>
-    <li>Tap or drag at least one die to hold it, then roll the rest.</li>
-    <li>Keep holding and re-rolling until all 5 dice are held.</li>
-    <li>Your score is the sum of your held dice, except 3s count as zero.</li>
-    <li>Pass the phone to the next player. Lowest total after everyone's turn wins.</li>
-  </ol>
+  <div class="play-row">
+    <div class="play-text">
+      <h2>How to play</h2>
+      <ol>
+        <li>Enter the names of everyone playing (1-8 players).</li>
+        <li>On your turn, roll all 5 dice.</li>
+        <li>Tap or drag at least one die to hold it, then roll the rest.</li>
+        <li>Keep holding and re-rolling until all 5 dice are held.</li>
+        <li>Your score is the sum of your held dice, except 3s count as zero.</li>
+        <li>Pass the phone to the next player. Lowest total after everyone's turn wins.</li>
+      </ol>
+    </div>
+    <aside class="get-app">
+      <p class="get-app-label">Get Threes</p>
+      <a class="app-store-badge" href="https://apps.apple.com/app/id6770581106" target="_blank" rel="noopener">
+        <img src="assets/app-store-badge.svg" alt="Download Threes on the App Store" width="210" height="70">
+      </a>
+      <p class="get-app-note">Free &middot; iPhone and iPad</p>
+    </aside>
+  </div>
   <p class="hint">Strategy hint: hold your 1s and 3s early. A 3 is the only die worth zero, and a 1 is nearly as good.</p>
   <p>Roll five 6s on your first roll of a turn and you <span class="moon">shoot the moon</span> — an instant win for the round.</p>
 
